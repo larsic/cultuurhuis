@@ -81,7 +81,7 @@ public class ReserverenServlet extends HttpServlet {
         BigDecimal aantal = null;
         if (StringUtils.isStrictlyNumeric(aantalString)) {
             aantal = new BigDecimal(aantalString);
-            if (aantalInt>0 || aantalInt > max) {
+            if (aantalInt<=0 || aantalInt > max) {
                 int maxy = max+1;
                 fouten.put("aantal", " kies een aantal tickets tussen 0 en " + maxy);
             }
