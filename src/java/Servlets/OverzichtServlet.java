@@ -5,84 +5,90 @@
  */
 package Servlets;
 
+import JavaFiles.NieuweKlant;
+import JavaFiles.Reservatie;
+import Repositories.VoorstellingenRepository;
+import com.mysql.jdbc.StringUtils;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import javax.annotation.Resource;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 
-/**
- *
- * @author Administrator
- */
-@WebServlet(name = "OverzichtServlet", urlPatterns = {"/OverzichtServlet"})
-public class OverzichtServlet extends HttpServlet {
+@WebServlet(urlPatterns = {"/overzicht"})
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet OverzichtServlet</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet OverzichtServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
+public class OverzichtServlet extends HttpServlet implements Serializable{
+
+    private static final long serialVersionUID = 1L;
+    private final transient VoorstellingenRepository voorstellingenRepository = new VoorstellingenRepository();
+
+    @Resource(name = VoorstellingenRepository.JNDI_NAME)
+    void setDataSource(DataSource dataSource) {
+        voorstellingenRepository.setDataSource(dataSource);
     }
+    private static final String VIEW = "WEB-INF/jsp/overzicht.jsp";
+    
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+
+        
+        request.getRequestDispatcher(VIEW).forward(request, response);
+
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
-    }
+        
+            HttpSession session = request.getSession(false);
+            @SuppressWarnings("unchecked")
+            TreeMap<String, Reservatie> mandje = (TreeMap) session.getAttribute("mandje");
+            Integer personalId = (Integer) session.getAttribute("personalid");
+            
+            
+            List<Reservatie> gelukt = new ArrayList<Reservatie>();
+            List<Reservatie> mislukt = new ArrayList<Reservatie>();
+            
+            
+            for(Map.Entry<String, Reservatie> entry : mandje.entrySet()){
+                
+                if(voorstellingenRepository.AddReservatie(entry.getKey(), entry.getValue().getAantalTickets(), personalId))
+                {
+                   gelukt.add(entry.getValue());
+                   mandje.remove(entry.getKey());
+               } else {
+                   mislukt.add(entry.getValue());
+                   mandje.remove(entry.getKey());
+               }
+                
+            }
+   
+            request.setAttribute("gelukt", gelukt);
+            request.setAttribute("mislukt", mislukt);
+            request.getRequestDispatcher(VIEW).forward(request, response);
+            
+        
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
+        
+    }
 
 }
