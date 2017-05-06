@@ -7,6 +7,7 @@ package Servlets;
 
 import JavaFiles.NieuweKlant;
 import JavaFiles.Reservatie;
+import JavaFiles.Voorstelling;
 import Repositories.VoorstellingenRepository;
 import com.mysql.jdbc.StringUtils;
 import java.io.IOException;
@@ -34,7 +35,7 @@ import javax.sql.DataSource;
 
 @WebServlet(urlPatterns = {"/overzicht"})
 
-public class OverzichtServlet extends HttpServlet implements Serializable{
+public class OverzichtServlet extends HttpServlet implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private final transient VoorstellingenRepository voorstellingenRepository = new VoorstellingenRepository();
@@ -44,13 +45,12 @@ public class OverzichtServlet extends HttpServlet implements Serializable{
         voorstellingenRepository.setDataSource(dataSource);
     }
     private static final String VIEW = "WEB-INF/jsp/overzicht.jsp";
-    
+    private static final String VIEW2 = "/index.htm";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        
         request.getRequestDispatcher(VIEW).forward(request, response);
 
     }
@@ -58,37 +58,36 @@ public class OverzichtServlet extends HttpServlet implements Serializable{
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-            HttpSession session = request.getSession(false);
-            @SuppressWarnings("unchecked")
-            TreeMap<String, Reservatie> mandje = (TreeMap) session.getAttribute("mandje");
-            Integer personalId = (Integer) session.getAttribute("personalid");
-            
-            
-            List<Reservatie> gelukt = new ArrayList<Reservatie>();
-            List<Reservatie> mislukt = new ArrayList<Reservatie>();
-            
-            
-            for(Map.Entry<String, Reservatie> entry : mandje.entrySet()){
+
+        HttpSession session = request.getSession(false);
+        @SuppressWarnings("unchecked")
+        TreeMap<String, Reservatie> mandje = (TreeMap) session.getAttribute("mandje");
+        Integer personalId = (Integer) session.getAttribute("personalid");
+
+        List<Reservatie> gelukt = new ArrayList<>();
+        List<Reservatie> mislukt = new ArrayList<>();
+
+        for (Map.Entry<String, Reservatie> entry : mandje.entrySet()) {
+
+            if(voorstellingenRepository.AddReservatie(entry.getKey(), entry.getValue().getAantalTickets(), personalId)) {
+                gelukt.add(entry.getValue());
+
+            } else {
+                Voorstelling v = voorstellingenRepository.findOne(entry.getKey());
+                int a = entry.getValue().getAantalTickets();
+                Reservatie r = new Reservatie(v,a);
+                mislukt.add(r);
                 
-                if(voorstellingenRepository.AddReservatie(entry.getKey(), entry.getValue().getAantalTickets(), personalId))
-                {
-                   gelukt.add(entry.getValue());
-                   mandje.remove(entry.getKey());
-               } else {
-                   mislukt.add(entry.getValue());
-                   mandje.remove(entry.getKey());
-               }
                 
             }
-   
-            request.setAttribute("gelukt", gelukt);
-            request.setAttribute("mislukt", mislukt);
-            request.getRequestDispatcher(VIEW).forward(request, response);
-            
-        
 
-        
+        }
+
+        session.removeAttribute("mandje");
+        request.setAttribute("gelukt", gelukt);
+        request.setAttribute("mislukt", mislukt);
+        request.getRequestDispatcher(VIEW).forward(request, response);
+
     }
 
 }
