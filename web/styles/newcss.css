@@ -13,3 +13,11 @@ h1 {
 h3 {
     color: gray;
 }
+th {
+    background-color: #4CAF50;
+    color: white;
+}
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+

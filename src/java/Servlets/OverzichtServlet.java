@@ -1,26 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Servlets;
 
-import JavaFiles.NieuweKlant;
 import JavaFiles.Reservatie;
 import JavaFiles.Voorstelling;
 import Repositories.VoorstellingenRepository;
-import com.mysql.jdbc.StringUtils;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -44,8 +29,8 @@ public class OverzichtServlet extends HttpServlet implements Serializable {
     void setDataSource(DataSource dataSource) {
         voorstellingenRepository.setDataSource(dataSource);
     }
-    private static final String VIEW = "WEB-INF/jsp/overzicht.jsp";
-    private static final String VIEW2 = "/index.htm";
+ 
+    private static final String VIEW = "SubmitServlet";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -69,25 +54,23 @@ public class OverzichtServlet extends HttpServlet implements Serializable {
 
         for (Map.Entry<String, Reservatie> entry : mandje.entrySet()) {
 
-            if(voorstellingenRepository.AddReservatie(entry.getKey(), entry.getValue().getAantalTickets(), personalId)) {
+            if (voorstellingenRepository.AddReservatie(entry.getKey(), entry.getValue().getAantalTickets(), personalId)) {
                 gelukt.add(entry.getValue());
 
             } else {
                 Voorstelling v = voorstellingenRepository.findOne(entry.getKey());
                 int a = entry.getValue().getAantalTickets();
-                Reservatie r = new Reservatie(v,a);
+                Reservatie r = new Reservatie(v, a);
                 mislukt.add(r);
-                
-                
+
             }
 
         }
 
         session.removeAttribute("mandje");
-        request.setAttribute("gelukt", gelukt);
-        request.setAttribute("mislukt", mislukt);
-        request.getRequestDispatcher(VIEW).forward(request, response);
-
+        session.setAttribute("gelukt", gelukt);
+        session.setAttribute("mislukt", mislukt);
+        response.sendRedirect(VIEW);
     }
 
 }

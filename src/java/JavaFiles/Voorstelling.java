@@ -1,35 +1,34 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package JavaFiles;
 
 import java.sql.Timestamp;
 
-
-
-/**
- *
- * @author Administrator
- */
 public class Voorstelling {
-    
+
     Timestamp date;
     String titel;
     String uitvoerders;
     String prijs;
     int vrijePlaatsen;
+    int id2;
 
     public Voorstelling() {
     }
 
-    public Voorstelling(Timestamp date, String titel, String uitvoerders, String prijs, int vrijePlaatsen) {
+    public Voorstelling(Timestamp date, String titel, String uitvoerders, String prijs, int vrijePlaatsen, int id2) {
         this.date = date;
         this.titel = titel;
         this.uitvoerders = uitvoerders;
         this.prijs = prijs;
         this.vrijePlaatsen = vrijePlaatsen;
+        this.id2 = id2;
+    }
+
+    public int getId2() {
+        return id2;
+    }
+
+    public void setId2(int id2) {
+        this.id2 = id2;
     }
 
     public Timestamp getDate() {
@@ -71,8 +70,4 @@ public class Voorstelling {
     public void setVrijePlaatsen(int vrijePlaatsen) {
         this.vrijePlaatsen = vrijePlaatsen;
     }
-    
-    
-    
-    
 }
