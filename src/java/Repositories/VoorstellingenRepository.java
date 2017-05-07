@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Repositories;
 
 import JavaFiles.NieuweKlant;
@@ -15,10 +10,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * @author Administrator
- */
 public class VoorstellingenRepository extends AbstractRepository {
 
     final String SELECT_ALL_VOORSTELLINGEN
@@ -42,17 +33,16 @@ public class VoorstellingenRepository extends AbstractRepository {
             = "insert into klanten(voornaam, familienaam, straat, huisnr, postcode, gemeente, gebruikersnaam, paswoord) values (?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String CHANGE_VRIJEPLAATSEN
-            = "UPDATE voorstellingen SET vrijeplaatsen = CASE WHEN vrijeplaatsen - ? >= 0 \n" +
-"                   THEN vrijeplaatsen - ?\n" +
-"                   ELSE vrijeplaatsen END where id = ?";
-            
-                
+            = "UPDATE voorstellingen SET vrijeplaatsen = CASE WHEN vrijeplaatsen - ? >= 0 \n"
+            + "                   THEN vrijeplaatsen - ?\n"
+            + "                   ELSE vrijeplaatsen END where id = ?";
+
     private static final String ADD_RESERVATIE
             = "insert into reservaties(klantid, voorstellingsid, plaatsen) values (?, ?, ?)";
-    
+
     private static final String GET_PID
             = "SELECT id FROM klanten WHERE gebruikersnaam = ?";
-            
+
     Voorstelling voorstelling;
 
     public List<Voorstelling> findAll(String id) {
@@ -200,7 +190,7 @@ public class VoorstellingenRepository extends AbstractRepository {
             } else {
 
                 try (PreparedStatement statement2 = connection.prepareStatement(ADD_RESERVATIE)) {
-                    
+
                     statement2.setInt(1, personalId);
                     statement2.setString(2, id);
                     statement2.setInt(3, aantal);
@@ -211,26 +201,29 @@ public class VoorstellingenRepository extends AbstractRepository {
                         return true;
                     }
 
-                }catch (SQLException ex) {
-            throw new RepositoryException(ex);
-        }
+                } catch (SQLException ex) {
+
+                    return false;
+                }
             }
 
         } catch (SQLException ex) {
-            throw new RepositoryException(ex);
+
+            return false;
         }
     }
-     public Integer findPID(String user) {
+
+    public Integer findPID(String user) {
         try (Connection connection = dataSource.getConnection();
                 PreparedStatement statement = connection.prepareStatement(GET_PID)) {
             statement.setString(1, user);
             try (ResultSet resultSet = statement.executeQuery()) {
                 Integer pid = null;
-              if (resultSet.next()) {  
+                if (resultSet.next()) {
                     pid = resultSet.getInt("id");
 
-              } 
-               return pid; 
+                }
+                return pid;
             }
 
         } catch (SQLException ex) {
