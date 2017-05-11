@@ -81,16 +81,16 @@ public class ReserverenServlet extends HttpServlet implements Serializable {
         if (aantalString.isEmpty()) {
             fouten.put("leeg", "tik een getal");
         } else {
-            aantalInt = Integer.parseInt(aantalString);
-
-            BigDecimal aantal = null;
-            if (StringUtils.isStrictlyNumeric(aantalString)) {
-                aantal = new BigDecimal(aantalString);
-                if (aantalInt <= 0 || aantalInt > max) {
+            try {
+               aantalInt = Integer.parseInt(aantalString);
+               if (aantalInt <= 0 || aantalInt > max) {
                     int maxy = max + 1;
                     fouten.put("aantal", " kies een aantal tickets tussen 0 en " + maxy);
                 }
+            } catch (Exception e) {
+                    fouten.put("aantal", "is geen geldig getal");
             }
+            
         }
 
         if (fouten.isEmpty()) {

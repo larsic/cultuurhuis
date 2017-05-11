@@ -47,6 +47,10 @@ public class OverzichtServlet extends HttpServlet implements Serializable {
         HttpSession session = request.getSession(false);
         @SuppressWarnings("unchecked")
         TreeMap<String, Reservatie> mandje = (TreeMap) session.getAttribute("mandje");
+        if(mandje==null){
+            response.sendRedirect(request.getContextPath());
+            return;
+        }
         Integer personalId = (Integer) session.getAttribute("personalid");
 
         List<Reservatie> gelukt = new ArrayList<>();
